@@ -41,7 +41,6 @@ def test_update_order(collect_order):
     assert isinstance(response.json(), dict)
     assert response.json()["message"] == f"주문 {collect_order} 가 성공적으로 업데이트되었습니다."
 
-
 def test_list_orders():
     """모든 주문 목록을 조회하는 테스트"""
     response = requests.get(f"{BASE_URL}/orders")

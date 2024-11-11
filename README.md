@@ -69,24 +69,13 @@
 기능 : 외부 주문 시스템에서 전송된 주문 데이터를 수집하여 인메모리에 저장합니다. 
 설명 : 주문은 collect_order 메서드를 통해 주문 데이터를 받습니다. order_id를 키로 사용하여 데이터를 저장합니다.
 
-
-
-
 - **주문 상태 업데이트**:
 기능 : 주문의 상태가 면경될때 tms 시스템에 알림을 전송합니다.
 설명 : update_order 메서드를 사용하여 주문 상태 변경을 전송합니다.
 
-
-
-
 - **외부 데이터 제공**:
 기능 : 외부 시스템이 주문 관리 시스템에 요청할때 주문 상태 및 캠페인 관련 데이터를 제공할 수 있습니다.
 설명 : 외부 시스템은 get_order 또는 list_orders 엔드포인트를 호출하여 주문 데이터를 받을 수 있습니다. 
-
-
-
-
-- **캠페인별 주문 통계**:
 
 
 # 실행방법
@@ -97,7 +86,23 @@ pip install -r requirements.txt
 ```
 
 ```txt
-
+.
+├── README.md
+├── app.py
+├── data
+│   └── sample_orders.json
+├── images
+│   ├── class-diagram.png
+│   ├── class-diagram.puml
+│   ├── plantuml.jar
+│   └── process.png
+├── requirements.txt
+├── src
+│   ├── ExternalSystemInterface.py
+│   ├── Order.py
+│   └── OrderService.py
+├── test.py
+└── tree.txt
 ```
 
 ## 플라스크 애플리케이션 실행
@@ -108,9 +113,14 @@ python app.py
 
 flask 서버가 http://127.0.0.1:5000에서 실행됩니다.
 - POST /collect_order: 새로운 주문 데이터를 수집합니다.
-POST /update_order: 기존 주문의 상태를 업데이트합니다.
-GET /orders/{order_id}: 특정 주문의 상세 정보를 조회합니다.
-GET /orders: 모든 주문 목록을 조회합니다
+- POST /update_order: 기존 주문의 상태를 업데이트합니다.
+- GET /orders/{order_id}: 특정 주문의 상세 정보를 조회합니다.
+- GET /orders: 모든 주문 목록을 조회합니다
 
 ## 테스트
 
+```Python
+pytest test.py
+```
+
+각 엔드포인트에 대한 테스트를 수행합니다. 
