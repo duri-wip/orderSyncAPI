@@ -4,6 +4,9 @@ import os
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
 import json
+from datetime import datetime
+from dataclasses import asdict
+
 from Order import Order
 from ExternalSystemInterface import TMSInterface, TasOnInterface
 
@@ -21,6 +24,8 @@ class OrderService():
                 sample_orders = json.load(f)
 
             for order_data in sample_orders:
+                order_data['order_date'] = datetime.fromisoformat(order_data['order_date'])
+
                 order = Order(**order_data)
                 self.collect_order(order)
         except Exception as e:
@@ -35,10 +40,10 @@ class OrderService():
             
             self.orders[order_id] = order_data
 
-            self.tms.send_order(order_data)
+            self.tms.send_order(asdict(order_data))
             
             if hasattr(order_data, 'campaign_id'):
-                self.tason.send_order(order_data)
+                self.tason.send_order(asdict(order_data))
 
             return {"message": f"주문{order_id} 가 성공적으로 수집되었습니다."}, 201
             
@@ -63,7 +68,7 @@ class OrderService():
                 existing_order.order_status = order_data.order_status
                 existing_order.items = order_data.items
 
-            self.tms.send_order(order_data)
+            self.tms.send_order(asdict(order_data))
             return {'message':f'주문 {order_id}가 성공적으로 업데이트되었습니다.'}, 200
         except (TypeError, ValueError) as e:
             print(f"업데이트 중 오류 발생 : {e}")
