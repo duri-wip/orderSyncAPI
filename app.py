@@ -31,7 +31,7 @@ class TasOnInterface(ExternalSystemInterface):
             
             print(f"TasOn: 주문 {order_data['order_id']}의 상태가 반영되었습니다.")
         except requests.RequestException as e:
-            print(f'주문 {order_data['order_id']}의 상태 : {e}')
+            print(f'주문 {order_data["order_id"]}의 상태 : {e}')
         
 # 주문관리 시스템
 class OrderService():
