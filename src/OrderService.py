@@ -33,6 +33,9 @@ class OrderService():
     
     def collect_order(self, order_data):
         try :
+            if isinstance(order_data, dict):
+                order_data = Order(**order_data)
+                
             order_id = order_data.order_id
             
             if not order_id:
