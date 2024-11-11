@@ -112,6 +112,20 @@ python app.py
 ```
 
 flask 서버가 http://127.0.0.1:5000에서 실행됩니다.
+
+실행 후, 외부 주문 시스템에 누적된 데이터인 data/sample_orders.json 파일이 로드되어 인메모리에 저장됩니다. 
+sample_orders.json 파일에는 주문 데이터 모델에 필요한 속성인 
+~~~
+    order_id: str
+    customer_id: str
+    customer_name: str
+    order_date: datetime
+    order_status: str
+    campaign_id: str
+    items: list
+~~~
+가 포함됩니다.
+
 - POST /collect_order: 새로운 주문 데이터를 수집합니다.
 - POST /update_order: 기존 주문의 상태를 업데이트합니다.
 - GET /orders/{order_id}: 특정 주문의 상세 정보를 조회합니다.
