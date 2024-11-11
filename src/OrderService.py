@@ -93,7 +93,8 @@ class OrderService():
         
     def list_orders(self):
         try:
-            return  [order.__dict__ for order in self.orders.values()]
+            orders = [order.to_dict() for order in self.orders.values()]
+            return  orders, 200
         except Exception as e:
             print(f"주문 목록 조회 중 오류 발생: {e}")
             return {'error':'주문 목록을 조회할 수 없습니다.'}, 500
