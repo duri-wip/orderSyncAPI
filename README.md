@@ -25,7 +25,7 @@
 
 ### 3. **프로세스 흐름**
 
-<img src='process.png' alt='프로세스 흐름도' width='300' height='300'>
+<img src='images/process.png' alt='프로세스 흐름도' width='300' height='300'>
 
 #### 1. 주문 시스템:
 - 고객의 주문 트랜잭션을 처리하고 주문을 생성하여 초기 상태를 설정합니다.
@@ -41,7 +41,7 @@
 ### 4. 상세 시스템 기능 및 클래스 다이어그램
 
 
-![class diagram](class-diagram.png)
+![class diagram](images/class-diagram.png)
 
 * OrderService: 주문관리의 주요 기능을 제공합니다.
   - 속성
@@ -67,7 +67,8 @@
 ## 주요 기능 구현
 - **주문 수집 및 저장** 
 기능 : 외부 주문 시스템에서 전송된 주문 데이터를 수집하여 인메모리에 저장합니다. 
-설명 : collect_order 메서드를 통해 주문 데이터를 받습니다. order_id를 키로 사용하여 데이터를 저장합니다.
+설명 : 주문은 collect_order 메서드를 통해 주문 데이터를 받습니다. order_id를 키로 사용하여 데이터를 저장합니다.
+
 
 
 
