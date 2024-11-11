@@ -75,13 +75,14 @@ class OrderService():
                 existing_order.items = order_data.items
 
             self.tms.send_order(order_data.to_dict())
-            return {'message':f'주문 {order_id}가 성공적으로 업데이트되었습니다.'}, 200
+            return {'message': f'주문 {order_id} 가 성공적으로 업데이트되었습니다.'}, 200
         except (TypeError, ValueError) as e:
             print(f"업데이트 중 오류 발생 : {e}")
-            return {'error':'유효하지 않은 데이터 형식'}, 400
+            return {'error': '유효하지 않은 데이터 형식'}, 400
         except Exception as e:
             print(f'업데이트 중 예기치 못한 오류 발생 : {e}')
-            return {'error':'알 수 없는 오류 발생'}, 500
+            return {'error': '알 수 없는 오류 발생'}, 500
+
         
     def get_order(self, order_id):
         try:
