@@ -10,7 +10,8 @@ class ExternalSystemInterface:
         raise NotImplementedError
     
 class TMSInterface(ExternalSystemInterface):
-    TMS_url = 'http://tms-system-url/api/update-order-status'
+    # TMS_url = 'http://tms-system-url/api/update-order-status'
+    TMS_url = 'http://httpbin.org/post'
 
     def send_order(self, order_data):
         try:
@@ -22,7 +23,8 @@ class TMSInterface(ExternalSystemInterface):
             print(f"TMS: 주문 {order_data['order_id']}의 상태 : {e}")
 
 class TasOnInterface(ExternalSystemInterface):
-    TASON_url = 'http://tason-system-url/api/campainge-order'
+    # TASON_url = 'http://tason-system-url/api/campainge-order'
+    TASON_url = 'http://httpbin.org/post'
 
     def send_order(self, order_data):
         try:
