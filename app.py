@@ -108,7 +108,7 @@ class OrderService():
             return  list(self.orders.values())
         except Exception as e:
             print(f"주문 목록 조회 중 오류 발생: {e}")
-            return {'error':'주문 목록을 조회할 수 없습니다.'}. 500
+            return {'error':'주문 목록을 조회할 수 없습니다.'}, 500
         
     #flask 엔드 포인트
 order_service = OrderService()
