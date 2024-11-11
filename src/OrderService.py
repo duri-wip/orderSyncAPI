@@ -86,7 +86,7 @@ class OrderService():
             order = self.orders.get(order_id)
             if not order:
                 return {'error':'주문을 찾을 수 없습니다.'}, 404
-            return order.__dict__
+            return order.to_dict(), 200
         except Exception as e:
             print(f'주문을 찾는 중 오류 발생: {e}')
             return {'error':'주문을 찾을 수 없습니다.'}, 500

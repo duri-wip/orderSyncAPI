@@ -19,11 +19,13 @@ def update_order():
 
 @app.route('/orders/<order_id>', methods=['GET'])
 def get_order(order_id):
-    return jsonify(order_service.get_order(order_id))
+    data, status_code = order_service.get_order(order_id)
+    return jsonify(data), status_code
 
 @app.route('/orders', methods=['GET'])
 def list_orders():
-    return jsonify(order_service.list_orders())
+    data, status_code = order_service.list_orders()
+    return jsonify(data), status_code
 
 if __name__=='__main__':
     app.run(debug=True, host='0.0.0.0')
