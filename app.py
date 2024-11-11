@@ -1,179 +1,135 @@
 from flask import Flask, request, jsonify
 import requests
+import json
 
 app = Flask(__name__)
 
-orders = {}
-
-# 주문 상태 변경을 받는 웹훅 엔드포인트
-@app.route('/update_order', methods=['POST'])
-def update_order():
-    order_data = request.json
-    order_id = order_data.get("order_id")
+#외부 시스템 인터페이스 정의
+class ExternalSystemInterface:
+    def send_orders(self, order_data):
+        raise NotImplementedError
     
-    if not order_id:
-        return jsonify({"error": "Order ID is required"}), 400
+class TMSInterface(ExternalSystemInterface):
+    TMS_url = 'http://tms-system-url/api/update-order-status'
 
-    # 주문이 존재하지 않는 경우 새로운 주문으로 추가
-    if order_id not in orders:
-        orders[order_id] = order_data
-    else:
-        # 기존 주문의 상태 업데이트
-        orders[order_id].update(order_data)
+    def send_order(self, order_data):
+        try:
+            response = requests.post(self.TMS_url, json=order_data)
+            response.raise_for_status()
+
+            print(f"TMS: 주문 {order_data['order_id']}의 상태가 반영되었습니다.")
+        except requests.RequestException as e:
+            print(f"TMS: 주문 {order_data['order_id']}의 상태 : {e}")
+
+class TasOnInterface(ExternalSystemInterface):
+    TASON_url = 'http://tason-system-url/api/campainge-order'
+
+    def send_order(self, order_data):
+        try:
+            response = requests.post(self.TASON_url, json=order_data)
+            response.raise_for_status()
+            
+            print(f"TasOn: 주문 {order_data['order_id']}의 상태가 반영되었습니다.")
+        except requests.RequestException as e:
+            print(f'주문 {order_data['order_id']}의 상태 : {e}')
+        
+# 주문관리 시스템
+class OrderService():
+    def __init__(self):
+        self.orders = {}
+        self.tms = TMSInterface()
+        self.tason = TasOnInterface()
+        self._load_sample_orders()
+
+    def _load_sample_orders(self):
+        try:
+            with open('sample_orders.json', 'r', encoding='utf-8') as f:
+                sample_orders = json.load(f)
+
+            for order_id, order_data in sample_orders.items():
+                self.collect_order(order_data)
+        except Exception as e:
+            print(f"샘플 데이터를 로드하는데 실패했습니다. : {e}")
     
-    return jsonify({"message": f"Order {order_id} updated successfully"}), 200
+    def collect_order(self, order_data):
+        try :
+            order_id = order_data.get('order_id')
 
+            if not order_id:
+                return {'error': "주문 id가 필요합니다."}, 400
+            
+            self.orders[order_id] = order_data
 
-# 외부 주문 시스템에서 실시간으로 데이터를 전달받아 저장하는 엔드포인트
+            self.tms.send_order(order_data)
+            
+            if 'campaign_id' in order_data:
+                self.tason.send_order(order_data)
+            return {"message": f"주문{order_id} 가 성공적으로 수집되었습니다."}, 201
+            
+        except (TypeError, ValueError) as e:
+            print(f"주문 수집 중 에러 발생 : {e}")
+            return {'error':'유효하지 않은 주문 데이터 포맷'}, 400
+        except Exception as e:
+            print(f"주문 수집 중 예쌍치 못한 오류 발생 : {e}")
+            return {'error': "예상치 못한 오류"}, 500
+    
+    def update_order(self, order_data):
+        try:
+            order_id = order_data.get('order_id')
+            if not order_id:
+                return {'error': '주문 id가 필요합니다.'}, 400
+            
+            if order_id not in self.orders:
+                self.orders[order_id] = order_data
+            else:
+                self.orders[order_id].update(order_data)
+
+            self.tms.send_order(order_data)
+            return {'message':f'주문 {order_id}가 성공적으로 업데이트되었습니다.'}, 201
+        except (TypeError, ValueError) as e:
+            print(f"업데이트 중 오류 발생 : {e}")
+            return {'error':'맞지 않는 데이터 형식'}, 400
+        except Exception as e:
+            print(f'업데이트 중 알수 없는 오류 발생 : {e}')
+            return {'error':'알 수 없는 오류 발생'}, 500
+        
+    def get_order(self, order_id):
+        try:
+            order = self.orders.get(order_id)
+            if not order:
+                return {'error':'주문을 찾을 수 없습니다.'}, 404
+            return order
+        except Exception as e:
+            print(f'주문을 찾는 중 오류 발생: {e}')
+            return {'error':'주문을 찾을 수 없습니다.'}, 500
+        
+    def list_orders(self):
+        try:
+            return  list(self.orders.values())
+        except Exception as e:
+            print(f"주문 목록 조회 중 오류 발생: {e}")
+            return {'error':'주문 목록을 조회할 수 없습니다.'}. 500
+        
+    #flask 엔드 포인트
+order_service = OrderService()
+
 @app.route('/collect_order', methods=['POST'])
 def collect_order():
-    order_data = request.json
-    
-    order_id = order_data.get('order_id')
-    if not order_id:
-        return jsonify({'error': 'Order ID is required'}), 400
-    
-    # 주문을 인메모리에 저장(주문관리시스템)
-    orders[order_id] = order_data
-    return jsonify({'message': f'Order {order_id} collected successfully'}), 201
+    order_data  = request.json
+    return jsonify(order_service.collect_order(order_data))
 
-# 주문 조회 엔드포인트 (단일 주문)
-@app.route('/orders/<order_id>', methods=['GET'])
-def get_order(order_id):
-    order = orders.get(order_id)
-    if not order:
-        return jsonify({'error': 'Order not found'}), 404
-    return jsonify(order)
-
-# 전체 주문 조회 엔드포인트
-@app.route('/orders', methods=['GET'])
-def list_orders():
-    return jsonify(list(orders.values()))
-
-
-
-##외부 시스템으로 주문데이터 전송
-
-EXTERNAL_SYSTEM_URL = "http://external-system-url/api/update_order"
-
-def send_to_external_system(order_data):
-    """외부 시스템으로 주문 데이터를 전송하는 함수"""
-    try:
-        response = requests.post(EXTERNAL_SYSTEM_URL, json=order_data)
-        response.raise_for_status()
-        print(f"Successfully sent order {order_data['order_id']} to external system.")
-    except requests.RequestException as e:
-        print(f"Failed to send order {order_data['order_id']} to external system: {e}")
-
-# 주문 상태 변경을 받는 웹훅 엔드포인트
 @app.route('/update_order', methods=['POST'])
 def update_order():
-    order_data = request.json
-    order_id = order_data.get("order_id")
-    
-    if not order_id:
-        return jsonify({"error": "Order ID is required"}), 400
+    order_data = request.json  
+    return jsonify(order_service.update_order(order_data))
 
-    # 주문이 존재하지 않는 경우 새로운 주문으로 추가
-    if order_id not in orders:
-        orders[order_id] = order_data
-    else:
-        # 기존 주문의 상태 업데이트
-        orders[order_id].update(order_data)
-    
-    # 상태 변경된 주문 데이터를 외부 시스템에 전송
-    send_to_external_system(order_data)
-    
-    return jsonify({"message": f"Order {order_id} updated successfully"}), 200
-
-
-if __name__ == '__main__':
-    app.run(debug=True, host="0.0.0.0")
-
-
----
-from flask import Flask, request, jsonify
-import requests
-
-app = Flask(__name__)
-
-# In-memory storage for orders
-orders = {}
-
-# 외부 시스템의 URL 설정
-TMS_URL = "http://tms-system-url/api/notify_order_status"
-TAS_ON_URL = "http://tason-system-url/api/campaign_order"
-
-def send_to_tms(order_data):
-    """TMS에 주문 상태 변경을 알림"""
-    try:
-        response = requests.post(TMS_URL, json=order_data)
-        response.raise_for_status()
-        print(f"Successfully sent order {order_data['order_id']} status to TMS.")
-    except requests.RequestException as e:
-        print(f"Failed to send order {order_data['order_id']} status to TMS: {e}")
-
-def send_to_tas_on(order_data):
-    """TasOn에 캠페인 관련 주문 데이터 전송"""
-    try:
-        response = requests.post(TAS_ON_URL, json=order_data)
-        response.raise_for_status()
-        print(f"Successfully sent order {order_data['order_id']} to TasOn.")
-    except requests.RequestException as e:
-        print(f"Failed to send order {order_data['order_id']} to TasOn: {e}")
-
-# 주문 수집 엔드포인트
-@app.route('/collect_order', methods=['POST'])
-def collect_order():
-    order_data = request.json
-    order_id = order_data.get("order_id")
-    campaign_id = order_data.get("campaign_id")  # 캠페인 주문인지 확인
-
-    if not order_id:
-        return jsonify({"error": "Order ID is required"}), 400
-    
-    # 주문을 인메모리에 저장
-    orders[order_id] = order_data
-
-    # 캠페인 주문일 경우 TasOn에 전송
-    if campaign_id:
-        send_to_tas_on(order_data)
-    
-    return jsonify({"message": f"Order {order_id} collected successfully"}), 201
-
-# 주문 상태 변경 엔드포인트 (웹훅 방식)
-@app.route('/update_order', methods=['POST'])
-def update_order():
-    order_data = request.json
-    order_id = order_data.get("order_id")
-    
-    if not order_id:
-        return jsonify({"error": "Order ID is required"}), 400
-
-    # 주문이 존재하지 않는 경우 새로운 주문으로 추가
-    if order_id not in orders:
-        orders[order_id] = order_data
-    else:
-        # 기존 주문의 상태 업데이트
-        orders[order_id].update(order_data)
-    
-    # 상태 변경된 주문 데이터를 TMS에 전송
-    send_to_tms(order_data)
-    
-    return jsonify({"message": f"Order {order_id} updated successfully"}), 200
-
-# 단일 주문 조회 엔드포인트
 @app.route('/orders/<order_id>', methods=['GET'])
 def get_order(order_id):
-    order = orders.get(order_id)
-    if not order:
-        return jsonify({"error": "Order not found"}), 404
-    return jsonify(order)
+    return jsonify(order_service.get_order(order_id))
 
-# 전체 주문 조회 엔드포인트
 @app.route('/orders', methods=['GET'])
 def list_orders():
-    return jsonify(list(orders.values()))
+    return jsonify(order_service.list_orders())
 
-if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0")
+if __name__=='__main__':
+    app.run(debug=True, host='0.0.0.0')
