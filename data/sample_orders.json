@@ -20,16 +20,5 @@
         "items": [
             {"product_id": "P1002", "product_name": "태블릿", "quantity": 2}
         ]
-    },
-    {
-        "order_id": "003",
-        "customer_id": "C003",
-        "customer_name": "Alice Johnson",
-        "order_date": "2023-11-11T09:15:00",
-        "order_status": "완료",
-        "campaign_id": "CAM003",
-        "items": [
-            {"product_id": "P1003", "product_name": "노트북", "quantity": 1}
-        ]
     }
 ]
