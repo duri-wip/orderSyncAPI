@@ -40,10 +40,10 @@ class OrderService():
             
             self.orders[order_id] = order_data
 
-            self.tms.send_order(asdict(order_data))
+            self.tms.send_order(order_data.to_dict())
             
             if hasattr(order_data, 'campaign_id'):
-                self.tason.send_order(asdict(order_data))
+                self.tason.send_order(order_data.to_dict())
 
             return {"message": f"주문{order_id} 가 성공적으로 수집되었습니다."}, 201
             
@@ -68,7 +68,7 @@ class OrderService():
                 existing_order.order_status = order_data.order_status
                 existing_order.items = order_data.items
 
-            self.tms.send_order(asdict(order_data))
+            self.tms.send_order(order_data.to_dict())
             return {'message':f'주문 {order_id}가 성공적으로 업데이트되었습니다.'}, 200
         except (TypeError, ValueError) as e:
             print(f"업데이트 중 오류 발생 : {e}")
