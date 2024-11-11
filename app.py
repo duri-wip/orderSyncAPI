@@ -15,7 +15,8 @@ def collect_order():
 @app.route('/update_order', methods=['POST'])
 def update_order():
     order_data = request.json  
-    return jsonify(order_service.update_order(order_data))
+    data, status_code = order_service.update_order(order_data)
+    return jsonify(data), status_code
 
 @app.route('/orders/<order_id>', methods=['GET'])
 def get_order(order_id):
