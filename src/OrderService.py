@@ -45,7 +45,7 @@ class OrderService():
             if hasattr(order_data, 'campaign_id'):
                 self.tason.send_order(order_data.to_dict())
 
-            return {"message": f"주문{order_id} 가 성공적으로 수집되었습니다."}, 201
+            return {"message": f"주문{order_id} 가 성공적으로 수집되었습니다."}, 200
             
         except (TypeError, ValueError) as e:
             print(f"주문 수집 중 에러 발생 : {e}")

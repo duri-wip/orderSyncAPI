@@ -21,7 +21,7 @@ sample_order = {
 def collect_order():
     """새로운 주문을 수집하는 테스트"""
     response = requests.post(f"{BASE_URL}/collect_order", json=sample_order)
-    assert response.status_code == 201
+    assert response.status_code == 200
     assert response.json()["message"] == f"주문 {sample_order['order_id']}가 성공적으로 수집되었습니다."
     return sample_order["order_id"]
 

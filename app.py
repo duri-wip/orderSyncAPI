@@ -9,7 +9,8 @@ order_service = OrderService()
 @app.route('/collect_order', methods=['POST'])
 def collect_order():
     order_data  = request.json
-    return jsonify(order_service.collect_order(order_data))
+    response = order_service.collect_order(order_data)
+    return jsonify(response[0]), response[1]
 
 @app.route('/update_order', methods=['POST'])
 def update_order():
