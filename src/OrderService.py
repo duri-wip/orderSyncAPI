@@ -62,6 +62,11 @@ class OrderService():
     
     def update_order(self, order_data):
         try:
+            if isinstance(order_data, dict):
+                if isinstance(order_data.get('order_date'), str):
+                    order_data['order_date'] = datetime.fromisoformat(order_data['order_date'])
+                order_data = Order(**order_data)
+                
             order_id = order_data.order_id
 
             if not order_id:
