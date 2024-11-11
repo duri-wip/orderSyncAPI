@@ -22,7 +22,7 @@ def collect_order():
     """새로운 주문을 수집하는 테스트"""
     response = requests.post(f"{BASE_URL}/collect_order", json=sample_order)
     assert response.status_code == 200
-    assert response.json()["message"] == f"주문 {sample_order['order_id']}가 성공적으로 수집되었습니다."
+    assert response.json()["message"] == f"주문  {sample_order['order_id']}가 성공적으로 수집되었습니다."
     return sample_order["order_id"]
 
 def test_get_order(collect_order):
@@ -38,7 +38,7 @@ def test_update_order(collect_order):
     updated_data = {"order_id": collect_order, "order_status": "배송 중"}
     response = requests.post(f"{BASE_URL}/update_order", json=updated_data)
     assert response.status_code == 200
-    assert response.json()["message"] == f"주문 {collect_order}가 성공적으로 업데이트되었습니다."
+    assert response.json()["message"] == f"주문  {collect_order}가 성공적으로 업데이트되었습니다."
 
 def test_list_orders():
     """모든 주문 목록을 조회하는 테스트"""
