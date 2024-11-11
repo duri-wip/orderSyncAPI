@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify
 
-from OrderService import OrderService
+from src.OrderService import OrderService
 
 app = Flask(__name__)
        
