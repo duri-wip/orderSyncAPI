@@ -1,46 +1,48 @@
+import pytest
 import requests
 
-base_url = "http://localhost:5000"
+# Flask 서버 URL
+BASE_URL = "http://127.0.0.1:5000"
 
-# Test Case 1: 기존 주문 상태 업데이트
-def test_update_existing_order():
-    print("Test Case 1: 기존 주문 상태 업데이트")
-    order_id = "1001"
-    update_data = {
-        "order_id": order_id,
-        "customer_name": "홍길동",
-        "order_date": "2024-11-10",
-        "order_status": "배송 중",  # 상태를 변경
-        "campaign_id": "CAMP123"
-    }
+# 샘플 주문 데이터
+sample_order = {
+    "order_id": "003",
+    "customer_id": "C003",
+    "customer_name": "Alice Johnson",
+    "order_date": "2023-11-11T09:15:00",
+    "order_status": "처리 중",
+    "campaign_id": "CAM003",
+    "items": [
+        {"product_id": "P1003", "product_name": "노트북", "quantity": 1}
+    ]
+}
 
-    response = requests.post(f"{base_url}/update_order", json=update_data)
-    
-    if response.status_code == 200:
-        print(f"주문 {order_id} 상태 업데이트 성공:", response.json())
-    else:
-        print(f"주문 {order_id} 상태 업데이트 실패:", response.status_code, response.text)
+@pytest.fixture(scope="module")
+def collect_order():
+    """새로운 주문을 수집하는 테스트"""
+    response = requests.post(f"{BASE_URL}/collect_order", json=sample_order)
+    assert response.status_code == 201
+    assert response.json()["message"] == f"주문 {sample_order['order_id']}가 성공적으로 수집되었습니다."
+    return sample_order["order_id"]
 
-# Test Case 2: 없는 주문 상태 업데이트 (새로운 주문 추가)
-def test_update_nonexistent_order():
-    print("Test Case 2: 없는 주문 상태 업데이트 (새로운 주문 추가)")
-    order_id = "9999"  # 존재하지 않는 주문 ID
-    update_data = {
-        "order_id": order_id,
-        "customer_name": "이몽룡",
-        "order_date": "2024-11-10",
-        "order_status": "처리 중",
-        "campaign_id": "CAMP999"
-    }
+def test_get_order(collect_order):
+    """특정 주문을 조회하는 테스트"""
+    response = requests.get(f"{BASE_URL}/orders/{collect_order}")
+    assert response.status_code == 200
+    order_data = response.json()
+    assert order_data["order_id"] == collect_order
+    assert order_data["customer_name"] == sample_order["customer_name"]
 
-    response = requests.post(f"{base_url}/update_order", json=update_data)
-    
-    if response.status_code == 200:
-        print(f"주문 {order_id} 상태 업데이트 성공 (새로운 주문 추가됨):", response.json())
-    else:
-        print(f"주문 {order_id} 상태 업데이트 실패:", response.status_code, response.text)
+def test_update_order(collect_order):
+    """주문 상태를 업데이트하는 테스트"""
+    updated_data = {"order_id": collect_order, "order_status": "배송 중"}
+    response = requests.post(f"{BASE_URL}/update_order", json=updated_data)
+    assert response.status_code == 200
+    assert response.json()["message"] == f"주문 {collect_order}가 성공적으로 업데이트되었습니다."
 
-# Run the test cases
-if __name__ == "__main__":
-    test_update_existing_order()
-    test_update_nonexistent_order()
+def test_list_orders():
+    """모든 주문 목록을 조회하는 테스트"""
+    response = requests.get(f"{BASE_URL}/orders")
+    assert response.status_code == 200
+    assert isinstance(response.json(), list)
+    assert len(response.json()) > 0
