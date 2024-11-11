@@ -24,7 +24,8 @@ class OrderService():
                 sample_orders = json.load(f)
 
             for order_data in sample_orders:
-                order_data['order_date'] = datetime.fromisoformat(order_data['order_date'])
+                if isinstance(order_data.get('order_date'), str):
+                    order_data['order_date'] = datetime.fromisoformat(order_data['order_date'])
 
                 order = Order(**order_data)
                 self.collect_order(order)
@@ -35,7 +36,7 @@ class OrderService():
         try :
             if isinstance(order_data, dict):
                 order_data = Order(**order_data)
-                
+
             order_id = order_data.order_id
             
             if not order_id:
