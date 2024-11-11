@@ -18,7 +18,7 @@ class OrderService():
 
     def _load_sample_orders(self):
         try:
-            with open('sample_orders.json', 'r', encoding='utf-8') as f:
+            with open('/home/sw/orderSyncAPI/data/sample_orders.json', 'r', encoding='utf-8') as f:
                 sample_orders = json.load(f)
 
             for order_data in sample_orders:
