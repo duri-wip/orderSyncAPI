@@ -1,0 +1,25 @@
+.
+├── README.md
+├── __pycache__
+│   └── test.cpython-311-pytest-8.3.3.pyc
+├── app.py
+├── data
+│   └── sample_orders.json
+├── images
+│   ├── class-diagram.png
+│   ├── class-diagram.puml
+│   ├── plantuml.jar
+│   └── process.png
+├── requirements.txt
+├── src
+│   ├── ExternalSystemInterface.py
+│   ├── Order.py
+│   ├── OrderService.py
+│   └── __pycache__
+│       ├── ExternalSystemInterface.cpython-311.pyc
+│       ├── Order.cpython-311.pyc
+│       └── OrderService.cpython-311.pyc
+├── test.py
+└── tree.txt
+
+5 directories, 17 files
