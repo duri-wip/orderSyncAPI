@@ -20,7 +20,7 @@ class TMSInterface(ExternalSystemInterface):
 
             print(f"TMS: 주문 {order_data['order_id']}의 상태가 반영되었습니다.")
         except requests.RequestException as e:
-            print(f"TMS: 주문 {order_data['order_id']}의 상태 : {e}")
+            print(f"TMS: 주문 {order_data['order_id']}의 상태 전송 실패 : {e}")
 
 class TasOnInterface(ExternalSystemInterface):
     # TASON_url = 'http://tason-system-url/api/campainge-order'
@@ -33,7 +33,7 @@ class TasOnInterface(ExternalSystemInterface):
             
             print(f"TasOn: 주문 {order_data['order_id']}의 상태가 반영되었습니다.")
         except requests.RequestException as e:
-            print(f'주문 {order_data["order_id"]}의 상태 : {e}')
+            print(f'주문 {order_data["order_id"]}의 상태 전송 실패 : {e}')
         
 # 주문관리 시스템
 class OrderService():
@@ -87,12 +87,12 @@ class OrderService():
                 self.orders[order_id].update(order_data)
 
             self.tms.send_order(order_data)
-            return {'message':f'주문 {order_id}가 성공적으로 업데이트되었습니다.'}, 201
+            return {'message':f'주문 {order_id}가 성공적으로 업데이트되었습니다.'}, 200
         except (TypeError, ValueError) as e:
             print(f"업데이트 중 오류 발생 : {e}")
-            return {'error':'맞지 않는 데이터 형식'}, 400
+            return {'error':'유효하지 않은 데이터 형식'}, 400
         except Exception as e:
-            print(f'업데이트 중 알수 없는 오류 발생 : {e}')
+            print(f'업데이트 중 예기치 못한 오류 발생 : {e}')
             return {'error':'알 수 없는 오류 발생'}, 500
         
     def get_order(self, order_id):

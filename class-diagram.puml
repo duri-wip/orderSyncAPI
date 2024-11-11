@@ -1,0 +1,48 @@
+@startuml
+
+!define EXTERNAL_SYSTEM_INTERFACE
+
+' 외부 시스템 인터페이스 정의
+interface ExternalSystemInterface {
+    +send_order(order_data: dict)
+}
+
+' TMS 인터페이스
+class TMSInterface implements ExternalSystemInterface {
+    -TMS_URL: str
+    +send_order(order_data: dict)
+}
+
+' TasOn 인터페이스
+class TasOnInterface implements ExternalSystemInterface {
+    -TAS_ON_URL: str
+    +send_order(order_data: dict)
+}
+
+' 주문 관리 시스템
+class OrderService {
+    -orders: dict
+    -tms: TMSInterface
+    -tason: TasOnInterface
+    +collect_order(order_data: dict)
+    +update_order(order_data: dict)
+    +get_order(order_id: str)
+    +list_orders()
+    +_load_sample_orders()
+}
+
+' Flask 엔드포인트에서 OrderService 호출
+class FlaskApp {
+    +collect_order()
+    +update_order()
+    +get_order(order_id: str)
+    +list_orders()
+}
+
+' 관계 정의
+OrderService --> ExternalSystemInterface : "uses"
+ExternalSystemInterface <|-- TMSInterface
+ExternalSystemInterface <|-- TasOnInterface
+FlaskApp --> OrderService
+
+@enduml
