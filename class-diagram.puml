@@ -29,7 +29,6 @@ class OrderService {
     +get_order(order_id: str)
     +list_orders()
     +_load_sample_orders()
-}
 
 ' Flask 엔드포인트에서 OrderService 호출
 class FlaskApp {
