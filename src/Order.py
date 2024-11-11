@@ -8,6 +8,7 @@ class Order:
     customer_name: str
     order_date: str
     order_status: str
+    campaign_id: str
     items: list
 
     
