@@ -62,24 +62,30 @@ class OrderService():
     
     def update_order(self, order_data):
         try:
-            if isinstance(order_data, dict):
-                if isinstance(order_data.get('order_date'), str):
-                    order_data['order_date'] = datetime.fromisoformat(order_data['order_date'])
-                order_data = Order(**order_data)
-                
-            order_id = order_data.order_id
+            order_id = order_data.get('order_id')
 
             if not order_id:
                 return {'error': '주문 id가 필요합니다.'}, 400
-            
-            if order_id not in self.orders:
-                self.orders[order_id] = order_data
-            else:
-                existing_order = self.orders[order_id]
-                existing_order.order_status = order_data.order_status
-                existing_order.items = order_data.items
 
-            self.tms.send_order(order_data.to_dict())
+            existing_order = self.orders.get(order_id)
+            if not existing_order:
+                return {'error': '주문을 찾을 수 없습니다.'}, 404
+
+            # 필수 필드 채우기 (기존 필드를 유지하며 업데이트)
+            updated_order_data = {
+                'order_id': order_id,
+                'customer_id': existing_order.customer_id,
+                'customer_name': existing_order.customer_name,
+                'order_date': existing_order.order_date,
+                'order_status': order_data.get('order_status', existing_order.order_status),
+                'campaign_id': existing_order.campaign_id,
+                'items': order_data.get('items', existing_order.items),
+            }
+
+            updated_order = Order(**updated_order_data)
+            self.orders[order_id] = updated_order
+
+            self.tms.send_order(updated_order.to_dict())
             return {'message': f'주문 {order_id} 가 성공적으로 업데이트되었습니다.'}, 200
         except (TypeError, ValueError) as e:
             print(f"업데이트 중 오류 발생 : {e}")
@@ -87,7 +93,6 @@ class OrderService():
         except Exception as e:
             print(f'업데이트 중 예기치 못한 오류 발생 : {e}')
             return {'error': '알 수 없는 오류 발생'}, 500
-
         
     def get_order(self, order_id):
         try:
